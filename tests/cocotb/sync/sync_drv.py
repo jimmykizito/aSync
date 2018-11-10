@@ -11,35 +11,25 @@ class SyncDriver(object):
         self.dut = dut
 
     def start_clk(self, clk_period):
-        cocotb.fork(Clock(self.dut.i_clk, clk_period, units='sec').start())
+        cocotb.fork(Clock(self.dut.i_clk, clk_period, units="sec").start())
 
     @cocotb.coroutine
-    def reset(self, duration, units='sec', is_hi=True):
-        if is_hi:
-            reset_val = 1
-        else:
-            reset_val = 0
-        self.dut.i_reset <= reset_val
-        yield Timer(duration, units=units)
-        self.dut.i_reset <= reset_val ^ 1
-
-    @cocotb.coroutine
-    def _delay(self, duration, units='sec'):
+    def _delay(self, duration, units="sec"):
         # Wrap Timer() in coroutine to allow forking.
         yield Timer(duration, units=units)
         raise ReturnValue(duration) # change to return dur for Python3
 
     @cocotb.coroutine
-    def randomise_bit(self, signal, t_min, t_max, timeout, units='sec'):
+    def randomise_bit(self, signal, t_min, t_max, t_total, units="sec"):
         """
         Toggle signal at random intervals in range [t_min, t_max] until
-        'timeout' units of time have passed.
+        't_total' units of time have passed.
         """
-        to_thd = cocotb.fork(self._delay(timeout, units))
-        to = to_thd.join()
+        timeout_thd = cocotb.fork(self._delay(t_total, units))
+        timeout = timeout_thd.join()
         while True:
             t_delay = random.randint(t_min, t_max)
-            trigger = yield [Timer(t_delay, units=units), to]
-            if trigger == timeout:
+            t_elapsed = yield [Timer(t_delay, units=units), timeout]
+            if t_elapsed == t_total:
                 break
             signal <= int(~signal.value)

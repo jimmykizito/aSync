@@ -1,8 +1,6 @@
 import cocotb
 from cocotb.monitors import Monitor
-from cocotb.triggers import Edge, RisingEdge, ReadOnly
-
-from sync.sync_mdl import SyncTransaction
+from cocotb.triggers import RisingEdge, ReadOnly
 
 class SyncMonitorIn(Monitor):
 
@@ -16,19 +14,14 @@ class SyncMonitorIn(Monitor):
 
     @cocotb.coroutine
     def _monitor_recv(self):
-        reset_edge = Edge(self.dut.i_reset)
-        d_edge = Edge(self.dut.i_d)
-        clk_edge = Edge(self.dut.i_clk)
-        transaction = SyncTransaction()
+        clk_edge = RisingEdge(self.dut.i_clk)
         ro = ReadOnly()
 
         while True:
-            yield [reset_edge, clk_edge, d_edge]
+            yield clk_edge
             yield ro
 
-            transaction.reset_val = self.dut.i_reset.value
-            transaction.clk_val = self.dut.i_clk.value
-            transaction.d_val = self.dut.i_d.value
+            transaction = self.dut.i_async.value
 
             self._recv(transaction)
 
@@ -44,13 +37,11 @@ class SyncMonitorOut(Monitor):
 
     @cocotb.coroutine
     def _monitor_recv(self):
-        reset_edge = Edge(self.dut.i_reset)
-        d_edge = Edge(self.dut.i_d)
-        clk_edge = Edge(self.dut.i_clk)
+        clk_edge = RisingEdge(self.dut.i_clk)
         ro = ReadOnly()
 
         while True:
-            yield [reset_edge, clk_edge, d_edge]
+            yield clk_edge
             yield ro
 
-            self._recv(self.dut.o_q.value)
+            self._recv(self.dut.o_sync.value)

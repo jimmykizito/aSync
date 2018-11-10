@@ -2,31 +2,26 @@
 `timescale 1ns/1ns
 
 /*!
- * Module description.
+ * Simple synchroniser formed by chaining flip-flops.
  */
 module top_sync
-  // #(
-    // parameter _PARAM = DEFAULT_VALUE,
-  // )
+  #(
+    parameter SYNC_DEPTH = 2
+  )
   (
-    // input|inout|output i|io|o_port_name,
     input i_clk,
-    input i_reset,
-    input i_d,
-    output o_q
+    input i_async,
+    output o_sync
   );
 
-  // Submodule instantiation
-  dff
-    // #(
-      // ._PARAM(VALUE),
-    // )
-    u_dff (
-      // .i|io|o_port_name(signal|port),
+  sync
+    #(
+      .SYNC_DEPTH(SYNC_DEPTH)
+    )
+    u_sync (
       .i_clk(i_clk),
-      .i_reset(i_reset),
-      .i_d(i_d),
-      .o_q(o_q)
+      .i_async(i_async),
+      .o_sync(o_sync)
     );
 
   // Wave dump

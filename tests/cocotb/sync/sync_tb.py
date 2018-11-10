@@ -23,10 +23,10 @@ class SyncTestbench:
         self.exp_out = []
         self._mdl = SyncModel(self.dut, exp_out=self.exp_out)
 
-        self._mon_in = SyncMonitorIn(self.dut, "dff_in",
-                                        callback=self._mdl.callback)
+        self._mon_in = SyncMonitorIn(self.dut, "sync_in",
+                                     callback=self._mdl.callback)
 
-        self._mon_out = SyncMonitorOut(self.dut, "dff_out")
+        self._mon_out = SyncMonitorOut(self.dut, "sync_out")
 
         self.sb = SyncScoreBoard(self.dut)
         self.sb.add_interface(self._mon_out, self.exp_out)
